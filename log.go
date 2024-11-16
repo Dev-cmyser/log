@@ -27,7 +27,7 @@ var Level = struct {
 	Fatal: "fatal",
 }
 
-var logger zerolog.Logger
+var logger *zerolog.Logger
 
 func debugMode(level zerolog.Level) {
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
@@ -59,15 +59,17 @@ func debugMode(level zerolog.Level) {
 		return fmt.Sprintf("%s ", i)
 	}
 
-	logger = zerolog.New(output).With().Timestamp().Logger()
+	newLogger := zerolog.New(output).With().Timestamp().Logger().Level(level)
+	logger = &newLogger
 	fmt.Println(level)
-	logger.Level(level)
-	zerolog.SetGlobalLevel(level)
+	fmt.Println("111111", getLevel(), logger.GetLevel(), level)
+
 }
 
 func defaultMode(level zerolog.Level) {
-	logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
-	logger.Level(level)
+	newLogger := zerolog.New(os.Stdout).With().Timestamp().Logger().Level(level)
+	logger = &newLogger
+
 }
 
 func SetLevel(level string) {
@@ -90,25 +92,6 @@ func SetLevel(level string) {
 
 }
 
-func getLogLevelByLib(l zerolog.Level) string {
-	switch l {
-	case zerolog.TraceLevel:
-		return Level.Trace
-	case zerolog.DebugLevel:
-		return Level.Debug
-	case zerolog.InfoLevel:
-		return Level.Info
-	case zerolog.WarnLevel:
-		return Level.Warn
-	case zerolog.ErrorLevel:
-		return Level.Error
-	case zerolog.FatalLevel:
-		return Level.Fatal
-	default:
-		return Level.Info
-	}
-}
-
 func Trace(message interface{}, args ...interface{}) {
 	msg(Level.Trace, message, args...)
 }
@@ -122,6 +105,8 @@ func Info(message string, args ...interface{}) {
 }
 
 func Warn(message string, args ...interface{}) {
+	fmt.Println("AAAAAA", getLevel())
+
 	msg(Level.Warn, message, args...)
 }
 
