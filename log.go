@@ -34,17 +34,17 @@ func debugMode(level zerolog.Level) {
 	output.FormatLevel = func(i interface{}) string {
 		col := color.New(color.FgWhite, color.Bold)
 		switch i {
-		case "trace":
+		case Level.Trace:
 			col = color.New(color.FgCyan)
-		case "debug":
+		case Level.Debug:
 			col = color.New(color.FgBlue)
-		case "info":
+		case Level.Info:
 			col = color.New(color.FgGreen)
-		case "warn":
+		case Level.Warn:
 			col = color.New(color.FgYellow)
-		case "error":
+		case Level.Error:
 			col = color.New(color.FgRed)
-		case "fatal":
+		case Level.Fatal:
 			col = color.New(color.FgMagenta)
 		}
 		return col.Sprintf(" %-6s", i)
@@ -61,8 +61,6 @@ func debugMode(level zerolog.Level) {
 
 	newLogger := zerolog.New(output).With().Timestamp().Logger().Level(level)
 	logger = &newLogger
-	fmt.Println(level)
-	fmt.Println("111111", getLevel(), logger.GetLevel(), level)
 
 }
 
@@ -105,8 +103,6 @@ func Info(message string, args ...interface{}) {
 }
 
 func Warn(message string, args ...interface{}) {
-	fmt.Println("AAAAAA", getLevel())
-
 	msg(Level.Warn, message, args...)
 }
 
@@ -162,6 +158,7 @@ func msg(level string, message interface{}, args ...interface{}) {
 
 func getCallerInfo(skip int) string {
 	pc, file, line, ok := runtime.Caller(skip)
+
 	if !ok {
 		return "unknown"
 	}
@@ -170,11 +167,15 @@ func getCallerInfo(skip int) string {
 	funcSlice := strings.Split(funcPath, "/")
 	funcName := funcSlice[len(funcSlice)-1]
 
-	fmt.Println(getLevel())
-	if getLevel() == Level.Debug {
-		return fmt.Sprintf("%s:%d  |  %s  |", file, line, funcName)
-	}
+	var info string
+	level := getLevel()
 
-	return fmt.Sprintf("%s:%d %s", file, line, funcName)
+	switch level {
+	case Level.Debug:
+		info = fmt.Sprintf("%s:%d  |  %s  |", file, line, funcName)
+	default:
+		info = ""
+	}
+	return info
 
 }
